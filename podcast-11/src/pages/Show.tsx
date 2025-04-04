@@ -1,65 +1,73 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Show } from "../types";
-import { useFavourites } from "../context/FavouritesContext";
-import { Heart, HeartOff } from "lucide-react";
+import { Show } from "../types/index";
+import EpisodeList from "../components/EpisodeList";
+import BackButton from "../components/BackButton";
 
 export default function ShowPage() {
   const { id } = useParams();
   const [show, setShow] = useState<Show | null>(null);
   const [selectedSeason, setSelectedSeason] = useState<number>(0);
-  const { favourites, toggleFavourite } = useFavourites();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch(`https://podcast-api.netlify.app/id/${id}`)
       .then((res) => res.json())
-      .then((data) => setShow(data));
+      .then((data) => {
+        setShow(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch show:", err);
+        setLoading(false);
+      });
   }, [id]);
 
-  if (!show) return <p>Loading show...</p>;
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [selectedSeason]);
+
+  if (loading) return <p className="p-4">Loading show...</p>;
+  if (!show) return <p className="p-4 text-red-500">Show not found.</p>;
 
   const season = show.seasons[selectedSeason];
 
   return (
-    <div>
+    <div className="p-4 max-w-4xl mx-auto">
+      <BackButton />
       <h1 className="text-3xl font-bold mb-4">{show.title}</h1>
-      <div className="flex space-x-2 mb-4">
+
+      {/* Season Selector */}
+      <div className="flex flex-wrap gap-2 mb-6">
         {show.seasons.map((season, i) => (
           <button
-            key={season.id}
-            className={`px-4 py-1 rounded ${i === selectedSeason ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+            key={season.id || i}
+            className={`px-4 py-1 rounded border ${
+              i === selectedSeason
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 dark:bg-gray-700 dark:text-white"
+            }`}
             onClick={() => setSelectedSeason(i)}
           >
-            {season.title}
+            {season.title} ({season.episodes.length} episodes)
           </button>
         ))}
       </div>
 
-      <ul className="space-y-4">
-        {season.episodes.map((ep) => {
-          const isFav = favourites.some((f) => f.episode.id === ep.id);
-          return (
-            <li key={ep.id} className="bg-white rounded-xl shadow p-4">
-              <div className="flex justify-between items-center">
-                <p className="font-semibold">{ep.title}</p>
-                <button
-                  onClick={() =>
-                    toggleFavourite({
-                      episode: ep,
-                      seasonTitle: season.title,
-                      showTitle: show.title,
-                      addedAt: new Date().toISOString(),
-                    })
-                  }
-                >
-                  {isFav ? <Heart className="text-red-500" /> : <HeartOff />}
-                </button>
-              </div>
-              <audio controls className="mt-2 w-full" src={ep.file}></audio>
-            </li>
-          );
-        })}
-      </ul>
+      {/* Season Preview Image */}
+      <img
+        src={season.image || "/fallback.jpg"}
+        alt={season.title}
+        className="w-full h-64 object-cover rounded mb-4"
+      />
+
+      {/* Episodes */}
+      <EpisodeList
+        episodes={season.episodes}
+        showTitle={show.title}
+        seasonTitle={season.title}
+      />
     </div>
   );
 }

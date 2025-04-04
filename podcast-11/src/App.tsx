@@ -2,6 +2,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Show from "./pages/Show";
 import Favourites from "./pages/Favourites";
+import AudioPlayerBar from "./components/AudioPlayerBar";
 
 export default function App() {
   return (
@@ -9,7 +10,7 @@ export default function App() {
       <header className="bg-white shadow sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="text-xl font-bold">
-            🎧 PodCentral
+          🎧 Yubcast
           </Link>
           <nav className="space-x-4">
             <Link to="/" className="hover:underline">
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/favourites" element={<Favourites />} />
         </Routes>
       </main>
+      <AudioPlayerBar />
     </div>
   );
 }

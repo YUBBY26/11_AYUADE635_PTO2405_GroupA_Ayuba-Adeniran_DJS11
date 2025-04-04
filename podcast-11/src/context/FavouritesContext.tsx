@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { FavouriteEpisode } from "../types/types.ts";
+import { FavouriteEpisode } from "../types/index";
 
 interface FavouritesContextProps {
   favourites: FavouriteEpisode[];
@@ -30,17 +30,33 @@ export const FavouritesProvider = ({ children }: { children: React.ReactNode }) 
   }, [favourites]);
 
   const toggleFavourite = (fav: FavouriteEpisode) => {
+    // Check if the episode is already favourited
+    const favId = typeof fav.episode.id === "number" ? fav.episode.id : fav.episode.episode;
+
+    // Only add it to the favourites if it's not already there
     setFavourites((prev) => {
-      const exists = prev.find((f) => f.episode.id === fav.episode.id);
+      const exists = prev.some(
+        (f) =>
+          (f.episode.id === favId || f.episode.episode === favId) &&
+          f.showTitle === fav.showTitle &&
+          f.seasonTitle === fav.seasonTitle
+      );
+
       if (exists) {
-        return prev.filter((f) => f.episode.id !== fav.episode.id);
+        return prev; // Do nothing if it already exists
       }
-      return [...prev, fav];
+
+      return [...prev, fav]; // Add to the list if it's not already favourited
     });
   };
 
   const removeFavourite = (id: number) => {
-    setFavourites((prev) => prev.filter((f) => f.episode.id !== id));
+    setFavourites((prev) =>
+      prev.filter((f) => {
+        const favId = typeof f.episode.id === "number" ? f.episode.id : f.episode.episode;
+        return favId !== id;
+      })
+    );
   };
 
   return (

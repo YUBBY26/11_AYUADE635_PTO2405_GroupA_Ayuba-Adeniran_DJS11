@@ -24,13 +24,22 @@ export interface Preview {
 
   export interface Episode {
     id: number;
-    file: string;
     title: string;
+    file: string;
+    description?: string;
+    duration?: number;
   }
+  
 
   export interface Genre {
     id: number;
     title: string;
     description: string;
     showIds: number[];
+  }
+  export interface FavouriteEpisode {
+    episode: Episode;
+    seasonTitle: string;
+    showTitle: string;
+    addedAt: string;
   }

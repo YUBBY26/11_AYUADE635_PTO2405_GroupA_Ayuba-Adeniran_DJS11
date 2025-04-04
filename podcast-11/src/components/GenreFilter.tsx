@@ -11,7 +11,8 @@ const GenreFilter: React.FC<Props> = ({ selectedGenre, onChange }) => {
     <div className="mb-6">
       <label className="font-medium mr-2">Filter by Genre:</label>
       <select
-        value={selectedGenre ?? ""}
+       title="filter by genre"
+        value={selectedGenre !== null ? selectedGenre : ""}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
         className="border px-2 py-1 rounded"
       >
